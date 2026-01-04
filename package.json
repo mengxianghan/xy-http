@@ -2,7 +2,7 @@
   "name": "xy-http",
   "type": "module",
   "version": "2.0.0",
-  "description": "",
+  "description": "基于 axios 的网络请求库",
   "author": {
     "name": "mengxianghan",
     "email": "mengxianghan@qq.com"
