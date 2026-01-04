@@ -4,50 +4,36 @@
 
 ## 安装
 
-使用 npm：
+### 1. NPM方式（推荐）
 
 ```shell
 npm install axios xy-http -S
 ```
 
-使用 jsDelivr CDN：
+### 2. CDN方式
 
 ```html
 
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/xy-http/dist/index.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xy-http/dist/index.global.js"></script>
 ```
 
-## 示例
+## 使用方法
 
-### 基础用法
+### 1. 导入
 
-```js
-import XYHttp from "docs/npm/xy-http";
+```typescript
+import { createHttp } from "xy-http";
+```
 
+### 2. 创建 Request 实例
+
+支持 `axios` 所有配置项
+
+```typescript
 const options = {
   baseURL: "https://api.example.com",
-  timeout: 1000
-};
-
-const request = new XYHttp(options);
-
-request.get("/getPageList", { current: 1, pageSize: 1 })
-  .then((res) => {
-    console.log(res);
-  })
-  .catch((err) => {
-  });
-```
-
-### 拦截器
-
-```js
-import XYHttp from 'docs/npm/xy-http'
-
-const options = {
-  baseURL: 'https://api.example.com',
-  timeout: 1000,
+  timeout: 3000,
   // 请求拦截
   interceptorRequest: (request) => {
     // 添加 token
@@ -59,166 +45,138 @@ const options = {
   },
   // 响应拦截
   interceptorResponse: (response) => {
-    if (response.data.code === 203) {
-      console.log('token 失效，请重新登录')
-      window.location.href = '/login'
+    if (response.data.code === 401) {
+      console.log('请登录')
     }
+    return response
   },
   // 响应拦截异常
   interceptorResponseCatch: (err) => {
     console.error(err)
   }
-}
+};
 
-const request = new XYHttp(options)
+const request = createHttp(options);
+```
 
-request.get('/getPageList', { current: 1, pageSize: 1 })
+### 3. 基本使用
+
+#### get 请求
+
+```typescript
+request.get("/getPageList", { current: 1, pageSize: 1 })
   .then((res) => {
-    console.log(res)
+    console.log(res);
   })
   .catch((err) => {
-  })
+  });
 ```
 
-### 取消相同请求
+#### post 请求
 
-```js {10-13,32}
-import XYHttp from 'docs/npm/xy-http'
+```typescript
+request.post("/user/register", { username: 'test', mobile: '138********' })
+  .then((res) => {
+    console.log(res);
+  })
+  .catch((err) => {
+  });
+```
 
-const options = {
-  baseURL: 'https://api.example.com',
-  timeout: 1000,
-  enableAbortContrller: true,
-  interceptorResponse: (response, controller) => {
-    if (response.data.code === 203) {
-      console.log('token 失效，请重新登录')
-      // 终止所有请求（仅开启终止控制器时有效）
-      controller.clear()
-      // 同时发起多个请求且未调用 controller.clear() ，下方代码将会执行多次
-      window.location.href = '/login'
-    }
+#### put 请求
+
+```typescript
+request.put("/user/1", { username: 'test' })
+  .then((res) => {
+    console.log(res);
+  })
+  .catch((err) => {
+  });
+```
+
+#### delete 请求
+
+```typescript
+request.delete("/user/1")
+  .then((res) => {
+    console.log(res);
+  })
+  .catch((err) => {
+  });
+```
+
+#### upload 请求
+
+```typescript
+const formData = new FormData()
+
+formData.append('file', file)
+formData.append('description', '这是一个文件上传的示例')
+
+request.upload("/user/1", formData, {
+  onUploadProgress: (progressEvent) => {
+    console.log('uploadProgressEvent===', progressEvent)
   },
-}
-
-const request = new XYHttp(options)
-
-function getList() {
-  request.get('/getPageList', { current: 1, pageSize: 1 })
-    .then((res) => {
-      console.log(res)
-    })
-    .catch((err) => {
-    })
-}
-
-function getList2() {
-  request.get('/getPageList',
-    { current: 1, pageSize: 1 },
-    { enableAbortController: false }
-  )
-    .then((res) => {
-      console.log(res)
-    })
-    .catch((err) => {
-    })
-}
-
-getList() // 请求会被取消
-getList()
-
-// 下面两个请求都不会被取消
-getList2()
-getList2()
+})
+  .then((res) => {
+    console.log(res);
+  })
+  .catch((err) => {
+  });
 ```
 
-### 请求多个服务
+#### download 请求
 
-```js
-import XYHttp from 'docs/npm/xy-http'
+默认 `get` 请求
 
-const options = {
-  timeout: 1000
-}
-
-// 服务 1
-const request1 = new XYHttp({
-  ...options,
-  baseURL: 'https://api.example_1.com/'
+```typescript
+request.download("http://xxxx.com/file.zip", {
+  responseType: 'blob',
+  onDownloadProgress: (progressEvent) => {
+    console.log('downloadProgressEvent===', progressEvent)
+  },
 })
-
-// 服务 2
-const request2 = new XYHttp({
-  ...options,
-  baseURL: 'https://api.example_2.com'
-})
-
-// 请求服务 1
-request1.get('/getPageList', { current: 1, pageSize: 10 })
   .then((res) => {
-    console.log(res)
+    console.log(res);
   })
-  .catch(() => {
-  })
-
-// 请求服务 2
-request2.get('/getPageList', { current: 1, pageSize: 10 })
-  .then((res) => {
-    console.log(res)
-  })
-  .catch(() => {
-  })
+  .catch((err) => {
+  });
 ```
 
-### 扩展 XYHttp
+#### 读取文件
 
-```js
-import XYHttp from 'docs/npm/xy-http'
+```typescript
+import {createHttp} from "xy-http";
 import jschardet from 'jschardet'
 
-/**
- * 读取文件
- */
-class ReadFile extends XYHttp {
-  constructor() {
-    super({
-      baseURL: '',
-      responseType: 'blob',
-      transformResponse: [
-        async (data) => {
-          const encoding = await this._encoding(data)
-          return new Promise((resolve) => {
-            let reader = new FileReader()
-            reader.readAsText(data, encoding)
-            reader.onload = function() {
-              resolve(reader.result)
-            }
-          })
-        },
-      ],
-
-    })
-  }
-
-  /**
-   * 文本编码
-   * @param data
-   * @returns {Promise<unknown>}
-   * @private
-   */
-  _encoding(data) {
-    return new Promise((resolve) => {
-      let reader = new FileReader()
-      reader.readAsBinaryString(data)
-      reader.onload = function() {
-        resolve(jschardet.detect(reader?.result).encoding)
-      }
-    })
-  }
+function encoding(data){
+  return new Promise((resolve) => {
+    let reader = new FileReader()
+    reader.readAsBinaryString(data)
+    reader.onload = function() {
+      resolve(jschardet.detect(reader?.result).encoding)
+    }
+  })
 }
 
-const readFile = new ReadFile()
+const request = createHttp({
+  baseURL: '',
+  responseType: 'blob',
+  transformResponse: [
+    async (data) => {
+      const encoding = await encoding(data)
+      return new Promise((resolve) => {
+        let reader = new FileReader()
+        reader.readAsText(data, encoding)
+        reader.onload = function() {
+          resolve(reader.result)
+        }
+      })
+    },
+  ],
+})
 
-readFile.get('https://cdn.example.com/1.txt')
+request.get('https://cdn.example.com/1.txt')
   .then((res) => {
     console.log(res)
   })
@@ -226,53 +184,78 @@ readFile.get('https://cdn.example.com/1.txt')
   })
 ```
 
-## API
+## API 文档
 
-### 参数
+### createHttp
 
-这是创建请求时可以用的配置项。仅列举出了`XYHttp`新增的配置。 [更多参数](https://www.axios-http.cn/docs/req_config)
+```typescript
+declare function createHttp(options: HttpOptions): HttpInstance
+```
 
-| 名称                       | 说明                        | 类型         | 默认值                                |
-|--------------------------|---------------------------|------------|------------------------------------|
-| enableAbortController    | 启用终止控制器。启用后会将同时发送的相同地请求取消 | `boolean`  | `false`                            |
-| interceptorRequest       | 请求拦截回调                    | `function` | `function(request){}`              |
-| interceptorRequestCatch  | 请求异常回调                    | `function` | `function(err){}`                  |
-| interceptorResponse      | 响应拦截回调                    | `function` | `function(response, controller){}` |
-| interceptorResponseCatch | 响应拦截异常回调                  | `function` | `function(err){}`                  |
+### get
 
-### 方法
+```typescript
+declare function get(
+  url: string,
+  params?: any,
+  options?: HttpGetOptions
+): Promise<any>
+```
 
-**基础实例方法**
+### post
 
-request(config)
+```typescript
+declare function post(
+  url: string, 
+  data?: any, 
+  options?: HttpPostOptions
+): Promise<any>
+```
 
-get(url[, params[, config]])
+### put
 
-delete(url[, data[, config]])
+```typescript
+declare function put(
+  url: string, 
+  data?: any,
+  options?: HttpPutOptions
+): Promise<any>
+```
 
-post(url[, data[, config]])
+### delete
 
-put(url[, data[, config]])
+```typescript
+declare function del(
+  url: string, 
+  data?: any, 
+  options?: HttpDeleteOptions
+): Promise<any>
+```
 
-upload(url, formData[, config])
+### upload
 
-download(url[, config])
+```typescript
+declare function upload(
+  url: string, 
+  formData?: FormData, 
+  options?: HttpUploadOptions
+): Promise<any>
+```
 
-**其他实例方法**
+### download
 
-第一步获取 store：
+```typescript
+declare function download(
+  url: string, 
+  options?: HttpDownloadOptions
+): Promise<any>
+```
 
-const store = instance.store
+### instance
 
-第二步使用：
-
-store.head(url[, config])
-
-store.options(url[, config])
-
-store.patch(url[, data[, config]])
-
-store.getUri([config])
+```typescript
+declare const instance: AxiosInstance
+```
 
 ## 依赖
 
