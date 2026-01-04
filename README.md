@@ -114,10 +114,10 @@ formData.append('file', file)
 formData.append('description', '这是一个文件上传的示例')
 
 request.upload("/user/1", formData, {
-  onUploadProgress: (progressEvent) => {
-    console.log('uploadProgressEvent===', progressEvent)
-  },
-})
+      onUploadProgress: (progressEvent) => {
+        console.log('uploadProgressEvent===', progressEvent)
+      },
+  })
   .then((res) => {
     console.log(res);
   })
@@ -146,7 +146,7 @@ request.download("http://xxxx.com/file.zip", {
 #### 读取文件
 
 ```typescript
-import {createHttp} from "xy-http";
+import { createHttp } from "xy-http";
 import jschardet from 'jschardet'
 
 function encoding(data){
@@ -256,6 +256,23 @@ declare function download(
 ```typescript
 declare const instance: AxiosInstance
 ```
+
+## 类型声明
+
+```typescript
+import type {
+  HttpDeleteOptions, 
+  HttpDownloadOptions,
+  HttpGetOptions, 
+  HttpInstance, 
+  HttpOptions, 
+  HttpPostOptions,
+  HttpPutOptions,
+  HttpUploadData,
+  HttpUploadOptions
+} from 'xy-http'
+```
+
 
 ## 依赖
 
