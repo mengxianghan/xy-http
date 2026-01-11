@@ -1,4 +1,4 @@
-import type { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios'
+import type { AxiosInstance, AxiosRequestConfig } from 'axios'
 import type {
   HttpDeleteOptions,
   HttpDownloadOptions,
@@ -66,13 +66,13 @@ class Http {
     return this.#axiosInstance
   }
 
-  request<T>(requestOptions: AxiosRequestConfig): Promise<AxiosResponse<T>> {
+  request<T>(requestOptions: AxiosRequestConfig): Promise<T> {
     return new Promise((resolve, reject) => {
       this.#axiosInstance
         .request(requestOptions)
         .then(
           (res) => {
-            resolve(res)
+            resolve(res.data)
           },
           (err) => {
             reject(err)
@@ -84,7 +84,7 @@ class Http {
     })
   }
 
-  get<T>(url = '', params = {}, getOptions?: HttpGetOptions): Promise<AxiosResponse<T>> {
+  get<T>(url = '', params = {}, getOptions?: HttpGetOptions): Promise<T> {
     return this.request<T>({
       ...(getOptions || {}),
       method: 'get',
@@ -93,7 +93,7 @@ class Http {
     })
   }
 
-  post<T>(url = '', data = {}, postOptions?: HttpPostOptions): Promise<AxiosResponse<T>> {
+  post<T>(url = '', data = {}, postOptions?: HttpPostOptions): Promise<T> {
     return this.request<T>({
       ...(postOptions || {}),
       method: 'post',
@@ -102,7 +102,7 @@ class Http {
     })
   }
 
-  put<T>(url: string, data = {}, putOptions?: HttpPutOptions): Promise<AxiosResponse<T>> {
+  put<T>(url: string, data = {}, putOptions?: HttpPutOptions): Promise<T> {
     return this.request<T>({
       ...(putOptions || {}),
       method: 'put',
@@ -111,7 +111,7 @@ class Http {
     })
   }
 
-  del<T>(url: string, data = {}, deleteOptions?: HttpDeleteOptions): Promise<AxiosResponse<T>> {
+  del<T>(url: string, data = {}, deleteOptions?: HttpDeleteOptions): Promise<T> {
     return this.request<T>({
       ...deleteOptions,
       method: 'delete',
@@ -120,17 +120,17 @@ class Http {
     })
   }
 
-  upload<T>(url: string, data: HttpUploadData, uploadOptions?: HttpUploadOptions): Promise<AxiosResponse<T>> {
-    return this.#axiosInstance.request<T>({
-      ...(uploadOptions || {}),
+  upload<T>(url: string, data: HttpUploadData, uploadOptions?: HttpUploadOptions): Promise<T> {
+    return this.request<T>({
       method: 'post',
+      ...(uploadOptions || {}),
       url,
       data,
     })
   }
 
-  download<T>(url: string, downloadOptions?: HttpDownloadOptions): Promise<AxiosResponse<T>> {
-    return this.#axiosInstance.request<T>({
+  download<T>(url: string, downloadOptions?: HttpDownloadOptions): Promise<T> {
+    return this.request<T>({
       method: 'get',
       ...(downloadOptions || {}),
       url,

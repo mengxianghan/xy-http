@@ -32,7 +32,7 @@ export interface HttpDeleteOptions extends BaseOptions<
 > {}
 
 export interface HttpUploadOptions extends BaseOptions<
-  Omit<AxiosRequestConfig, 'url' | 'method' | 'data'>
+  Omit<AxiosRequestConfig, 'url'>
 > {}
 
 export interface HttpDownloadOptions extends BaseOptions<
@@ -42,12 +42,12 @@ export interface HttpDownloadOptions extends BaseOptions<
 export type HttpUploadData = FormData | Record<string, any>
 
 export interface HttpInstance {
-  request: <T>(options: AxiosRequestConfig) => Promise<AxiosResponse<T>>
-  get: <T>(url: string, params?: any, options?: HttpGetOptions) => Promise<AxiosResponse<T>>
-  post: <T>(url: string, data?: any, options?: HttpPostOptions) => Promise<AxiosResponse<T>>
-  put: <T>(url: string, data?: any, options?: HttpPutOptions) => Promise<AxiosResponse<T>>
-  del: <T>(url: string, data?: any, options?: HttpDeleteOptions) => Promise<AxiosResponse<T>>
-  upload: <T>(url: string, data: HttpUploadData, options?: HttpUploadOptions) => Promise<AxiosResponse<T>>
-  download: <T>(url: string, options?: HttpDownloadOptions) => Promise<AxiosResponse<T>>
+  request: <T>(options: AxiosRequestConfig) => Promise<T>
+  get: <T>(url: string, params?: any, options?: HttpGetOptions) => Promise<T>
+  post: <T>(url: string, data?: any, options?: HttpPostOptions) => Promise<T>
+  put: <T>(url: string, data?: any, options?: HttpPutOptions) => Promise<T>
+  del: <T>(url: string, data?: any, options?: HttpDeleteOptions) => Promise<T>
+  upload: <T>(url: string, data: HttpUploadData, options?: HttpUploadOptions) => Promise<T>
+  download: <T>(url: string, options?: HttpDownloadOptions) => Promise<T>
   instance: AxiosInstance
 }
